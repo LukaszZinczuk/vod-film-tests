@@ -1,0 +1,40 @@
+name: VOD Film Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Install Playwright browsers
+      run: playwright install --with-deps chromium
+      
+    - name: Run E2E tests
+      run: pytest tests/test_e2e_search.py -v --html=reports/e2e-report.html --self-contained-html
+      
+    - name: Run API tests  
+      run: pytest tests/test_api_search.py -v --html=reports/api-report.html --self-contained-html
+      
+    - name: Upload test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports
+        path: reports/

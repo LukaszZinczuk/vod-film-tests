@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  vod-tests:
+    build: .
+    volumes:
+      - ./reports:/app/reports
+    environment:
+      - PYTHONPATH=/app
+      - HEADLESS=true
+    command: pytest tests/ -v --html=reports/report.html --self-contained-html
