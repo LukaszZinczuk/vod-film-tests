@@ -6,10 +6,16 @@ from typing import Generator
 @pytest.fixture(scope="session")
 def browser() -> Generator[Browser, None, None]:
     """Fixture dla przeglądarki - jedna instancja na sesję testową"""
+    import os
+    
+    # Sprawdź czy jesteśmy w Docker lub CI
+    is_headless = os.getenv('HEADLESS', 'false').lower() == 'true' or os.getenv('CI', 'false').lower() == 'true'
+    
     with sync_playwright() as p:
         browser = p.chromium.launch(
-            headless=False,  # Ustaw na True dla CI/CD
-            slow_mo=1000     # Spowolnienie dla lepszej obserwacji
+            headless=is_headless,
+            slow_mo=0 if is_headless else 1000,  # Bez spowolnienia w headless
+            args=['--no-sandbox', '--disable-dev-shm-usage'] if is_headless else []
         )
         yield browser
         browser.close()
